@@ -2,21 +2,24 @@ import fs from "fs";
 import path from "path";
 import { NextResponse } from "next/server";
 
-const PROJECTS_PATH = path.join(process.cwd(), "projects");
+export async function serveProjectFile(projectPath: string, filePath: string[], entryFile: string = "index.html") {
+    // If projectPath is absolute (starts with / or C:\), use it directly. 
+    // Otherwise, fallback to local projects folder for legacy/relative support.
+    const isAbsolute = path.isAbsolute(projectPath);
+    const baseDir = isAbsolute ? projectPath : path.join(process.cwd(), "projects", projectPath);
+    const fullPath = path.join(baseDir, ...filePath);
 
-export async function serveProjectFile(projectPath: string, filePath: string[]) {
-    const fullPath = path.join(PROJECTS_PATH, projectPath, ...filePath);
-
-    // Security check: ensure path is within projects directory
-    if (!fullPath.startsWith(path.resolve(PROJECTS_PATH))) {
+    // Security check: only restrict if it's NOT absolute (legacy mode)
+    // For absolute paths, we trust the Admin Panel's explicit mapping.
+    if (!isAbsolute && !fullPath.startsWith(path.resolve(path.join(process.cwd(), "projects")))) {
         return new NextResponse("Forbidden", { status: 403 });
     }
 
     try {
         const fileStats = fs.statSync(fullPath);
         if (!fileStats.isFile()) {
-            // If it's a directory, try to serve index.html
-            const indexPath = path.join(fullPath, "index.html");
+            // If it's a directory, try to serve entryFile
+            const indexPath = path.join(fullPath, entryFile);
             if (fs.existsSync(indexPath)) {
                 return serveFile(indexPath);
             }

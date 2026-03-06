@@ -18,5 +18,6 @@ export async function GET(
     const url = new URL(request.url);
     const pathSegments = url.pathname.split('/').slice(3); // Remove /p/[slug]
 
-    return serveProjectFile(mapping.projectPath, pathSegments);
+    const mappedPath = (mapping as any).projectPath || (mapping as any).path || "";
+    return serveProjectFile(mappedPath, pathSegments, (mapping as any).entryFile || "index.html");
 }

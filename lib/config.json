@@ -2,14 +2,19 @@
     "adminPassword": "change-me-later",
     "mappings": [
         {
-            "password": "demo",
-            "projectPath": "demo-project",
-            "slug": "demo"
+            "password": "3G-Wine",
+            "projectPath": "3d-wine",
+            "slug": "3g-wine"
         },
         {
-            "password": "123dwine_456",
-            "projectPath": "3d-wine",
-            "slug": "3dwine"
+            "slug": "numerosmagicos",
+            "password": "numerosmagicos",
+            "path": "numerosmagicos"
+        },
+        {
+            "slug": "magic",
+            "password": "magic",
+            "path": "numerosmagicos"
         }
     ]
 }

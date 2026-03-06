@@ -23,8 +23,13 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
     try {
-        const newMapping = await request.json(); // { password, projectPath, slug }
+        const newMapping = await request.json(); // { password, projectPath, slug, entryFile }
         const config = getConfig();
+
+        // Validate and set default
+        if (!newMapping.entryFile) {
+            newMapping.entryFile = "index.html";
+        }
 
         // Remove existing mapping with same slug if any
         config.mappings = config.mappings.filter((m: any) => m.slug !== newMapping.slug);
