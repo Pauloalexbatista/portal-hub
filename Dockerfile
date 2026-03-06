@@ -9,7 +9,7 @@ COPY package.json ./
 # Note: package-lock.json is used as source if pnpm-lock.yaml is missing
 COPY package-lock.json* ./ 
 
-RUN pnpm install --frozen-lockfile || pnpm install
+RUN pnpm install --no-frozen-lockfile
 
 # Stage 2: Build the application
 FROM node:22-alpine AS builder
