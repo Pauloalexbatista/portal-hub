@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  portal-hub:
+    build: .
+    ports:
+      - "3010:3000"
+    volumes:
+      - /home/root/staging_projects:/app/projects:ro
+    environment:
+      - NODE_ENV=production
+    restart: always

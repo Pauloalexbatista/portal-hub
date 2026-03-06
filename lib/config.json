@@ -1,0 +1,10 @@
+{
+    "adminPassword": "change-me-later",
+    "mappings": [
+        {
+            "password": "client_demo",
+            "projectPath": "demo-project",
+            "slug": "demo"
+        }
+    ]
+}
