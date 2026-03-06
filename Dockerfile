@@ -1,17 +1,28 @@
 # Stage 1: Install dependencies
 FROM node:22-alpine AS deps
 WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci
+
+# Install pnpm
+RUN npm install -g pnpm
+
+COPY package.json ./
+# Note: package-lock.json is used as source if pnpm-lock.yaml is missing
+COPY package-lock.json* ./ 
+
+RUN pnpm install --frozen-lockfile || pnpm install
 
 # Stage 2: Build the application
 FROM node:22-alpine AS builder
 WORKDIR /app
+
+RUN npm install -g pnpm
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
 # Disable telemetry during build
 ENV NEXT_TELEMETRY_DISABLED 1
-RUN npm run build
+RUN pnpm run build
 
 # Stage 3: Production runner
 FROM node:22-alpine AS runner
