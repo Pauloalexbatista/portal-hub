@@ -4,9 +4,9 @@ import config from "@/lib/config.json";
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { slug: string; path: string[] } }
+    context: { params: Promise<{ slug: string }> }
 ) {
-    const { slug } = await params;
+    const { slug } = await context.params;
 
     // Find project mapping
     const mapping = config.mappings.find((m) => m.slug === slug);

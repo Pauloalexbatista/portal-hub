@@ -2,9 +2,14 @@
     "adminPassword": "change-me-later",
     "mappings": [
         {
-            "password": "client_demo",
+            "password": "demo",
             "projectPath": "demo-project",
             "slug": "demo"
+        },
+        {
+            "password": "123dwine_456",
+            "projectPath": "3d-wine",
+            "slug": "3dwine"
         }
     ]
 }
