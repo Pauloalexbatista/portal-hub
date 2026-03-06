@@ -1,6 +1,6 @@
 import { serveProjectFile } from "@/lib/project-server";
 import { NextRequest } from "next/server";
-import config from "@/lib/config.json";
+import { getConfig } from "@/lib/config-helper";
 
 export async function GET(
     request: NextRequest,
@@ -8,8 +8,11 @@ export async function GET(
 ) {
     const { slug } = await context.params;
 
+    // Read config dynamically to bypass Next.js static component caching
+    const config = getConfig();
+
     // Find project mapping
-    const mapping = config.mappings.find((m) => m.slug === slug);
+    const mapping = config.mappings.find((m: any) => m.slug === slug);
     if (!mapping) {
         return new Response("Project Not Configured", { status: 404 });
     }

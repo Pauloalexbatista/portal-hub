@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import config from "@/lib/config.json";
+import { getConfig } from "@/lib/config-helper";
 
 export async function POST(request: NextRequest) {
     try {
         const { password } = await request.json();
 
-        const mapping = config.mappings.find((m) => m.password === password);
+        // Read config dynamically to bypass Next.js static production cache
+        const config = getConfig();
+
+        const mapping = config.mappings.find((m: any) => m.password === password);
 
         if (mapping) {
             const response = NextResponse.json({

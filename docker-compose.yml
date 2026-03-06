@@ -7,6 +7,7 @@ services:
       - "3010:3000"
     volumes:
       - /home/root/staging_projects:/home/root/staging_projects:ro
+      - /home/root/portal_data:/app/data
     environment:
       - NODE_ENV=production
     labels:
