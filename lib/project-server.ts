@@ -5,8 +5,13 @@ import { NextResponse } from "next/server";
 export async function serveProjectFile(projectPath: string, filePath: string[], entryFile: string = "index.html", slug: string = "") {
     // If projectPath is absolute (starts with / or C:\), use it directly. 
     // Otherwise, fallback to local projects folder for legacy/relative support.
+    // 1. Resolve Project Base Directory
     const isAbsolute = path.isAbsolute(projectPath);
     const baseDir = isAbsolute ? projectPath : path.join(process.cwd(), "projects", projectPath);
+
+    // 2. Identify Target Path
+    // If the browser asks for /_next/... from root, but we know it's for this project
+    // via Referer or specific slug, we adjust the look-up.
     const fullPath = path.join(baseDir, ...filePath);
 
     // Security check: only restrict if it's NOT absolute (legacy mode)
@@ -15,18 +20,43 @@ export async function serveProjectFile(projectPath: string, filePath: string[], 
         return new NextResponse("Forbidden", { status: 403 });
     }
 
+    // 3. Execution: Serve File or Try Project-Aware Fallback
     try {
+        if (fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()) {
+            return serveFile(fullPath, slug);
+        }
+
+        // 4. FALLBACK: Root-Asset Discovery
+        // If the browser asks for /_next/... (absolute path) and it doesn't exist locally,
+        // we check if it exists inside the project's folder.
+        // This handles cases where Referer Routing didn't rewrite the URL (static assets)
+        if (filePath.length > 0) {
+            const assetRelativePath = path.join(baseDir, ...filePath);
+            if (fs.existsSync(assetRelativePath) && fs.statSync(assetRelativePath).isFile()) {
+                return serveFile(assetRelativePath, slug);
+            }
+        }
+
+        // 5. Directory Handling
         const fileStats = fs.statSync(fullPath);
         if (!fileStats.isFile()) {
-            // If it's a directory, try to serve entryFile
             const indexPath = path.join(fullPath, entryFile);
             if (fs.existsSync(indexPath)) {
                 return serveFile(indexPath, slug);
             }
-            return new NextResponse("Not Found", { status: 404 });
         }
-        return serveFile(fullPath, slug);
+
+        return new NextResponse("Not Found", { status: 404 });
     } catch (e) {
+        // Final attempt: if we have a valid filePath, it might be a root-level static asset
+        // that Next.js expects at root, but we have locally in baseDir.
+        try {
+            const assetPath = path.join(baseDir, ...filePath);
+            if (fs.existsSync(assetPath) && fs.statSync(assetPath).isFile()) {
+                return serveFile(assetPath, slug);
+            }
+        } catch (inner) { }
+
         return new NextResponse("Not Found", { status: 404 });
     }
 }
