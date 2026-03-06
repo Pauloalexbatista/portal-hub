@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { NextResponse } from "next/server";
 
-export async function serveProjectFile(projectPath: string, filePath: string[], entryFile: string = "index.html", slug: string = "") {
+export async function serveProjectFile(projectPath: string, filePath: string[], entryFile: string = "index.html", slug: string = "", request?: Request) {
     // If projectPath is absolute (starts with / or C:\), use it directly. 
     // Otherwise, fallback to local projects folder for legacy/relative support.
     // 1. Resolve Project Base Directory
@@ -12,7 +12,20 @@ export async function serveProjectFile(projectPath: string, filePath: string[], 
     // 2. Identify Target Path
     // If the browser asks for /_next/... from root, but we know it's for this project
     // via Referer or specific slug, we adjust the look-up.
-    const fullPath = path.join(baseDir, ...filePath);
+    let fullPath = path.join(baseDir, ...filePath);
+
+    // 3. Fallback: If not found, try to identify project from Referer header
+    if (!fs.existsSync(fullPath) && request) {
+        const referer = request.headers.get('referer');
+        if (referer && referer.includes(`/p/${slug}`)) {
+            // Confirm this specific asset path exists inside the project
+            // This force-resolves baseDir assets requested at root
+            const assetRelativePath = path.join(baseDir, ...filePath);
+            if (fs.existsSync(assetRelativePath)) {
+                fullPath = assetRelativePath;
+            }
+        }
+    }
 
     // Security check: only restrict if it's NOT absolute (legacy mode)
     // For absolute paths, we trust the Admin Panel's explicit mapping.

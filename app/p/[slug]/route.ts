@@ -22,5 +22,5 @@ export async function GET(
     const pathSegments = url.pathname.split('/').slice(3); // Remove /p/[slug]
 
     const mappedPath = (mapping as any).projectPath || (mapping as any).path || "";
-    return serveProjectFile(mappedPath, pathSegments, (mapping as any).entryFile || "index.html", slug);
+    return serveProjectFile(mappedPath, pathSegments, (mapping as any).entryFile || "index.html", slug, request);
 }
