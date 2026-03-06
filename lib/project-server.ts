@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { NextResponse } from "next/server";
 
-export async function serveProjectFile(projectPath: string, filePath: string[], entryFile: string = "index.html") {
+export async function serveProjectFile(projectPath: string, filePath: string[], entryFile: string = "index.html", slug: string = "") {
     // If projectPath is absolute (starts with / or C:\), use it directly. 
     // Otherwise, fallback to local projects folder for legacy/relative support.
     const isAbsolute = path.isAbsolute(projectPath);
@@ -21,18 +21,19 @@ export async function serveProjectFile(projectPath: string, filePath: string[], 
             // If it's a directory, try to serve entryFile
             const indexPath = path.join(fullPath, entryFile);
             if (fs.existsSync(indexPath)) {
-                return serveFile(indexPath);
+                return serveFile(indexPath, slug);
             }
             return new NextResponse("Not Found", { status: 404 });
         }
-        return serveFile(fullPath);
+        return serveFile(fullPath, slug);
     } catch (e) {
         return new NextResponse("Not Found", { status: 404 });
     }
 }
 
-function serveFile(filePath: string) {
-    const fileBuffer = fs.readFileSync(filePath);
+function serveFile(filePath: string, slug: string = "") {
+    let fileBuffer = fs.readFileSync(filePath);
+    let content: string | Buffer = fileBuffer;
     const ext = path.extname(filePath).toLowerCase();
 
     const mimeTypes: { [key: string]: string } = {
@@ -46,7 +47,28 @@ function serveFile(filePath: string) {
         ".json": "application/json",
     };
 
-    return new NextResponse(fileBuffer, {
+    // Fix for static assets path in HTML
+    if (ext === ".html" && slug) {
+        let html = fileBuffer.toString("utf-8");
+
+        // 1. Inject Base Tag (cleanest)
+        const baseTag = `<base href="/p/${slug}/">`;
+        if (html.includes("<head>")) {
+            html = html.replace("<head>", `<head>${baseTag}`);
+        } else {
+            html = html.replace("<html>", `<html><head>${baseTag}</head>`);
+        }
+
+        // 2. Fallback: Rewrite absolute Next.js paths just in case (sometimes scripts ignore base tag)
+        // src="/_next/" -> src="_next/"
+        // href="/_next/" -> href="_next/"
+        html = html.replace(/src="\//g, 'src="');
+        html = html.replace(/href="\//g, 'href="');
+
+        content = html;
+    }
+
+    return new NextResponse(content, {
         headers: {
             "Content-Type": mimeTypes[ext] || "application/octet-stream",
         },
