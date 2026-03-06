@@ -19,16 +19,16 @@ export function middleware(request: NextRequest) {
                 const refererUrl = new URL(referer);
                 const refererPath = refererUrl.pathname;
 
-                // If the user is on a project page like /p/3gwine
-                if (refererPath.startsWith('/p/')) {
-                    const slug = refererPath.split('/')[2];
-                    if (slug && !pathname.startsWith(`/p/${slug}`)) {
-                        // REWRITE: internally point root assets to the project subpath
-                        // Browser asks for /_next/... -> we internally serve /p/3gwine/_next/...
-                        const newUrl = request.nextUrl.clone();
-                        newUrl.pathname = `/p/${slug}${pathname}`;
-                        return NextResponse.rewrite(newUrl);
-                    }
+                // Match /p/slug or /p/slug/
+                const match = refererPath.match(/\/p\/([^\/]+)/);
+                const slug = match ? match[1] : null;
+
+                if (slug && !pathname.startsWith(`/p/${slug}`)) {
+                    // REWRITE: internally point root assets to the project subpath
+                    // Browser asks for /_next/... -> we internally serve /p/3gwine/_next/...
+                    const newUrl = request.nextUrl.clone();
+                    newUrl.pathname = `/p/${slug}${pathname}`;
+                    return NextResponse.rewrite(newUrl);
                 }
             } catch (e) {
                 // Ignore invalid referer URLs
