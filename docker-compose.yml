@@ -9,4 +9,9 @@ services:
       - /home/root/staging_projects:/home/root/staging_projects:ro
     environment:
       - NODE_ENV=production
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portal-hub.rule=Host(`testeweb.cloud`)"
+      - "traefik.http.routers.portal-hub.entrypoints=https"
+      - "traefik.http.routers.portal-hub.tls.certresolver=letsencrypt"
     restart: always
