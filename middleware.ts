@@ -4,9 +4,10 @@ import type { NextRequest } from 'next/server'
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl
 
-    // Allow login page, static files, and admin
+    // Allow login page, static files, and global accessible routes
     if (
         pathname === '/' ||
+        pathname === '/admin' || // Handled by inline auth in layout
         pathname.startsWith('/_next') ||
         pathname.startsWith('/api') ||
         pathname.includes('.')
