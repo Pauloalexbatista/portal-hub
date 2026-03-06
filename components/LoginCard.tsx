@@ -14,18 +14,25 @@ export const LoginCard = () => {
         setLoading(true);
         setError(false);
 
-        // Simulation of server-side mapping check
-        // In a real app, this would be an API call to /api/auth
-        setTimeout(() => {
-            if (password === "demo") {
-                document.cookie = "project_session=active; path=/; max-age=3600";
+        try {
+            const res = await fetch("/api/auth/verify", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ password }),
+            });
+
+            if (res.ok) {
+                const data = await res.json();
                 // Redirect to the actual project route
-                window.location.href = "/p/demo/";
+                window.location.href = `/p/${data.slug}/`;
             } else {
                 setLoading(false);
                 setError(true);
             }
-        }, 1500);
+        } catch (err) {
+            setLoading(false);
+            setError(true);
+        }
     };
 
     return (
