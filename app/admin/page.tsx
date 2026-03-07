@@ -148,7 +148,7 @@ export default function AdminPage() {
                     </div>
 
                     {/* Configuração de Acesso */}
-                    <div className="space-y-6">
+                    <form onSubmit={(e) => { e.preventDefault(); handleAdd(); }} className="space-y-6">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <label className="text-[10px] uppercase text-zinc-500 font-bold italic">2. Endereço Público (Link)</label>
@@ -174,7 +174,8 @@ export default function AdminPage() {
                         <div className="space-y-2">
                             <label className="text-[10px] uppercase text-zinc-500 font-bold italic">4. Password de Acesso</label>
                             <input
-                                type="text"
+                                type="password"
+                                autoComplete="new-password"
                                 placeholder="ex: senha_secreta_2024"
                                 value={newMapping.password}
                                 onChange={(e) => setNewMapping({ ...newMapping, password: e.target.value })}
@@ -183,14 +184,14 @@ export default function AdminPage() {
                         </div>
 
                         <button
-                            onClick={handleAdd}
+                            type="submit"
                             className="mt-4 flex items-center justify-center gap-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 px-8 py-3 rounded-xl transition-all w-full shadow-lg shadow-emerald-500/5 group"
                             title="Ativar o link do projeto selecionado"
                         >
                             <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
                             <span className="font-bold uppercase tracking-wider text-xs">Ativar Link Seguro</span>
                         </button>
-                    </div>
+                    </form>
                 </div>
             </div>
 

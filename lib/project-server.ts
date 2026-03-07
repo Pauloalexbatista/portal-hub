@@ -76,7 +76,7 @@ export async function serveProjectFile(projectPath: string, filePath: string[], 
 
 function serveFile(filePath: string, slug: string = "") {
     let fileBuffer = fs.readFileSync(filePath);
-    let content: string | Buffer = fileBuffer;
+    let content: string | Uint8Array = new Uint8Array(fileBuffer);
     const ext = path.extname(filePath).toLowerCase();
 
     const mimeTypes: { [key: string]: string } = {
@@ -111,7 +111,7 @@ function serveFile(filePath: string, slug: string = "") {
         content = html;
     }
 
-    return new NextResponse(content, {
+    return new NextResponse(content as any, {
         headers: {
             "Content-Type": mimeTypes[ext] || "application/octet-stream",
         },
