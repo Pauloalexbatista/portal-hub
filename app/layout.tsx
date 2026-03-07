@@ -28,6 +28,8 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+        {/* Version marker for deploy verification */}
+        <div style={{ display: 'none' }} data-deploy-version="2026-03-07-v2" />
       </body>
     </html>
   );
