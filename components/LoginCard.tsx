@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { ShieldCheck, ChevronRight, AlertCircle } from "lucide-react";
 
 export const LoginCard = () => {
     const [password, setPassword] = useState("");
@@ -23,9 +22,8 @@ export const LoginCard = () => {
             });
 
             if (res.ok) {
-                const data = await res.json();
-                // Redirect to the actual project route
-                window.location.href = `/p/${data.slug}/`;
+                // Redirect to admin dashboard
+                window.location.href = "/admin";
             } else {
                 setLoading(false);
                 setError(true);
@@ -38,30 +36,21 @@ export const LoginCard = () => {
 
     return (
         <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={loading ? { scale: 1.1, opacity: 0, filter: "blur(10px)" } : { opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.8, ease: "easeInOut" }}
-            className="relative z-10 w-full max-w-md p-8 bg-zinc-900/60 backdrop-blur-2xl rounded-2xl border border-white/10 shadow-2xl"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={loading ? { scale: 1.05, opacity: 0, filter: "blur(10px)" } : { opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="w-full max-w-[440px] p-10 bg-zinc-900/90 backdrop-blur-xl rounded-[32px] border border-white/5 shadow-2xl"
         >
-            <form onSubmit={handleLogin} className="flex flex-col items-center gap-6">
-                <div className="p-4 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                    <ShieldCheck className={`w-12 h-12 text-emerald-400 ${loading ? 'animate-pulse' : ''}`} />
-                </div>
-
-                <div className="text-center">
-                    <h1 className="text-2xl font-bold tracking-tight text-white/90">
-                        Project Gateway
-                    </h1>
-                    <p className="text-sm text-emerald-400/60 mt-1 font-mono uppercase tracking-widest">
-                        testeweb.cloud
-                    </p>
-                </div>
+            <form onSubmit={handleLogin} className="flex flex-col items-center gap-8">
+                <h1 className="text-2xl font-black uppercase tracking-[0.2em] text-white/90">
+                    Painel de Controlo
+                </h1>
 
                 <div className="w-full space-y-4">
-                    <div className="relative group">
+                    <div className="relative">
                         <input
                             type="password"
-                            placeholder="Digite a senha de acesso..."
+                            placeholder="ADMIN Master Password"
                             disabled={loading}
                             autoComplete="current-password"
                             value={password}
@@ -69,34 +58,23 @@ export const LoginCard = () => {
                                 setPassword(e.target.value);
                                 if (error) setError(false);
                             }}
-                            className={`w-full bg-black/40 border ${error ? 'border-red-500/50' : 'border-white/5'} rounded-lg py-4 px-12 text-center text-emerald-300 placeholder:text-emerald-500/30 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-mono tracking-widest disabled:opacity-50`}
+                            className={`w-full bg-black/40 border ${error ? 'border-red-500/50' : 'border-white/10'} rounded-2xl py-5 px-6 text-center text-emerald-400 placeholder:text-emerald-500/20 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all font-mono tracking-widest text-sm`}
                         />
-                        <div className="absolute inset-y-0 left-4 flex items-center">
-                            <span className={`w-2 h-2 rounded-full border ${error ? 'border-red-500' : 'border-emerald-500/50'} ${loading ? 'animate-ping' : 'group-focus-within:animate-ping'}`} />
-                        </div>
                     </div>
 
                     {error && (
-                        <motion.div
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="flex items-center gap-2 text-red-400 text-xs justify-center font-mono"
-                        >
-                            <AlertCircle className="w-4 h-4" />
-                            Senha incorreta ou projeto inacessível.
-                        </motion.div>
+                        <p className="text-red-400 text-[10px] font-mono uppercase tracking-widest text-center animate-pulse">
+                            Acesso Negado. Tenta novamente.
+                        </p>
                     )}
 
-                    <motion.button
+                    <button
                         type="submit"
-                        whileHover={{ scale: loading ? 1 : 1.02 }}
-                        whileTap={{ scale: loading ? 1 : 0.98 }}
                         disabled={loading}
-                        className="w-full bg-emerald-500/80 hover:bg-emerald-500 text-black font-semibold py-4 rounded-lg flex items-center justify-center gap-2 transition-colors shadow-[0_0_20px_rgba(16,185,129,0.3)] disabled:opacity-50"
+                        className="w-full bg-emerald-600 hover:bg-emerald-500 text-black font-bold py-5 rounded-2xl transition-all shadow-lg active:scale-95 disabled:opacity-50 uppercase tracking-widest text-sm"
                     >
-                        {loading ? "Autenticando..." : "Entrar no Sistema"}
-                        {!loading && <ChevronRight className="w-5 h-5" />}
-                    </motion.button>
+                        {loading ? "A processar..." : "Entrar"}
+                    </button>
                 </div>
             </form>
         </motion.div>

@@ -5,22 +5,19 @@ export async function POST(request: NextRequest) {
     try {
         const { password } = await request.json();
 
-        // Read config dynamically to bypass Next.js static production cache
+        // Read config dynamically
         const config = getConfig();
 
-        const mapping = config.mappings.find((m: any) => m.password === password);
-
-        if (mapping) {
+        if (password === config.adminPassword) {
             const response = NextResponse.json({
-                success: true,
-                slug: mapping.slug
+                success: true
             });
 
-            // Set session cookie
-            response.cookies.set("project_session", "active", {
+            // Set session cookie for admin
+            response.cookies.set("admin_session", "active", {
                 path: "/",
                 maxAge: 3600,
-                httpOnly: false, // Accessible by client-side router
+                httpOnly: false,
                 sameSite: "lax",
             });
 

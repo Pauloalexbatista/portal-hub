@@ -75,6 +75,8 @@ const FolderExplorer = ({ onSelect }: { onSelect: (path: string) => void }) => {
     );
 };
 
+import { ServerStats } from "@/components/ServerStats";
+
 export default function AdminPage() {
     const [mappings, setMappings] = useState<Mapping[]>([]);
     const [newMapping, setNewMapping] = useState<Mapping>({
@@ -126,9 +128,11 @@ export default function AdminPage() {
     };
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-700 pb-20">
-            {/* Form de Adição */}
-            <div className="bg-zinc-900/50 border border-white/5 p-6 rounded-xl space-y-6 shadow-2xl">
+        <div className="space-y-12 animate-in fade-in duration-700 pb-20">
+            {/* Monitorização VPS */}
+            <ServerStats />
+
+            <div className="border-t border-white/5 pt-12">
                 <h2 className="text-sm font-semibold uppercase tracking-widest text-emerald-400/80 mb-6 border-b border-white/5 pb-4">Conectar Novo Projeto</h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

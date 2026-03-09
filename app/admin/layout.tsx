@@ -66,10 +66,10 @@ export default function AdminLayout({
             <div className="max-w-6xl mx-auto p-8 pt-20">
                 <div className="mb-12 flex justify-between items-center border-b border-white/5 pb-8">
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-emerald-400 bg-clip-text text-transparent">
-                            Gestão de Projetos
+                        <h1 className="text-3xl font-black tracking-[0.1em] uppercase bg-gradient-to-r from-white to-emerald-400 bg-clip-text text-transparent">
+                            Centro de Comando
                         </h1>
-                        <p className="text-emerald-500/60 font-mono text-sm mt-1">Admin Dashboard / testeweb.cloud</p>
+                        <p className="text-emerald-500/60 font-mono text-[10px] mt-1 tracking-widest uppercase italic">VPS Monitoring & Infrastructure</p>
                     </div>
                     <button
                         onClick={() => {
