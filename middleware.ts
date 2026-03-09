@@ -2,60 +2,35 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
-    const { pathname } = request.nextUrl
+    const url = request.nextUrl;
+    const path = url.pathname;
 
-    // 1. Detect Asset Requests (Next.js internals or static files)
-    const isAsset = pathname.startsWith('/_next') ||
-        pathname.startsWith('/api') ||
-        pathname.includes('.') ||
-        pathname.startsWith('/images/'); // Common for images
-
-    if (isAsset) {
-        // 2. Intelligent Referer-based Routing
-        // Check where this request is coming from
-        const referer = request.headers.get('referer');
-        if (referer) {
-            try {
-                const refererUrl = new URL(referer);
-                const refererPath = refererUrl.pathname;
-
-                // Match /p/slug or /p/slug/
-                const match = refererPath.match(/\/p\/([^\/]+)/);
-                const slug = match ? match[1] : null;
-
-                if (slug && !pathname.startsWith(`/p/${slug}`)) {
-                    // REWRITE: internally point root assets to the project subpath
-                    // Browser asks for /_next/... -> we internally serve /p/3gwine/_next/...
-                    const newUrl = request.nextUrl.clone();
-                    newUrl.pathname = `/p/${slug}${pathname}`;
-                    return NextResponse.rewrite(newUrl);
+    // 1. Intercept assets that IFrames look for at the root
+    // They usually look for /_next/static or images at the root
+    const response = (path.startsWith('/_next/') || path.startsWith('/images/'))
+        ? (function () {
+            const referer = request.headers.get('referer');
+            if (referer) {
+                const projectMatch = referer.match(/\/(?:p|api\/raw)\/([^\/]+)/);
+                if (projectMatch) {
+                    const slug = projectMatch[1];
+                    return NextResponse.rewrite(new URL(`/api/raw/${slug}${path}`, request.url));
                 }
-            } catch (e) {
-                // Ignore invalid referer URLs
             }
-        }
+            return NextResponse.next();
+        })()
+        : NextResponse.next();
 
-        // Default: serve as global asset
-        return NextResponse.next();
-    }
-
-    // Allow login page and global routes
-    if (pathname === '/' || pathname === '/admin') {
-        return NextResponse.next()
-    }
-
-    // Check for session cookie
-    const session = request.cookies.get('project_session')?.value
-
-    // For this demo/brainstorming phase, we assume any valid project slug 
-    // requires a session. If no session, redirect to home.
-    if (!session) {
-        return NextResponse.redirect(new URL('/', request.url))
-    }
-
-    return NextResponse.next()
+    return response;
 }
 
 export const config = {
-    matcher: '/:path*',
+    matcher: [
+        '/_next/:path*',
+        '/images/:path*',
+        '/p/:path*',
+        '/api/raw/:path*',
+        '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    ],
 }
+

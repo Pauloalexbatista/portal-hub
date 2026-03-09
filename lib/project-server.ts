@@ -77,7 +77,7 @@ export async function serveProjectFile(projectPath: string, filePath: string[], 
 function serveFile(filePath: string, slug: string = "") {
     let fileBuffer = fs.readFileSync(filePath);
     let content: string | Uint8Array = new Uint8Array(fileBuffer);
-    const ext = path.extname(filePath).toLowerCase();
+    let ext = path.extname(filePath).toLowerCase();
 
     const mimeTypes: { [key: string]: string } = {
         ".html": "text/html",
@@ -94,7 +94,14 @@ function serveFile(filePath: string, slug: string = "") {
     if (ext === ".html" && slug) {
         let html = fileBuffer.toString("utf-8");
 
-        // 1. Inject Base Tag (cleanest)
+        // 1. Rewrite absolute Next.js paths FIRST 
+        // /_next/ -> next-static/ (bypassing portal's own _next)
+        // Handle both double and single quotes
+        html = html.replace(/src=["']\//g, (match) => match.slice(0, -1));
+        html = html.replace(/href=["']\//g, (match) => match.slice(0, -1));
+        html = html.replace(/_next\//g, 'next-static/');
+
+        // 2. Inject Base Tag (must remain starting with / so it's absolute from domain root)
         const baseTag = `<base href="/p/${slug}/">`;
         if (html.includes("<head>")) {
             html = html.replace("<head>", `<head>${baseTag}`);
@@ -102,13 +109,31 @@ function serveFile(filePath: string, slug: string = "") {
             html = html.replace("<html>", `<html><head>${baseTag}</head>`);
         }
 
-        // 2. Fallback: Rewrite absolute Next.js paths just in case (sometimes scripts ignore base tag)
-        // src="/_next/" -> src="_next/"
-        // href="/_next/" -> href="_next/"
-        html = html.replace(/src="\//g, 'src="');
-        html = html.replace(/href="\//g, 'href="');
-
         content = html;
+    }
+
+    // Auto-resolve .html for navigation links (e.g. "sobre" -> "sobre.html")
+    // This block should only execute if the initial filePath didn't have an extension
+    // and the file wasn't found (which is handled by the caller, serveProjectFile).
+    // However, if serveProjectFile passes a path without an extension, we can try to resolve it here.
+    if (!ext) {
+        const altPath = filePath + ".html";
+        if (fs.existsSync(altPath) && fs.statSync(altPath).isFile()) {
+            ext = ".html"; // Update extension for MIME type
+            let html = fs.readFileSync(altPath, "utf-8");
+
+            // Apply the same HTML fixes to the newly resolved file
+            html = html.replace(/src="\//g, 'src="');
+            html = html.replace(/href="\//g, 'href="');
+            html = html.replace(/_next\//g, 'next-static/');
+            const baseTag = `<base href="/p/${slug}/">`;
+            if (html.includes("<head>")) {
+                html = html.replace("<head>", `<head>${baseTag}`);
+            } else {
+                html = html.replace("<html>", `<html><head>${baseTag}</head>`);
+            }
+            content = html;
+        }
     }
 
     return new NextResponse(content as any, {

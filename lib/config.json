@@ -9,12 +9,17 @@
         {
             "slug": "numerosmagicos",
             "password": "numerosmagicos",
-            "path": "numerosmagicos"
+            "projectPath": "numerosmagicos"
+        },
+        {
+            "slug": "numerosmagicos",
+            "password": "numerosmagicos",
+            "projectPath": "numerosmagicos"
         },
         {
             "slug": "magic",
             "password": "magic",
-            "path": "numerosmagicos"
+            "projectPath": "numerosmagicos"
         }
     ]
 }

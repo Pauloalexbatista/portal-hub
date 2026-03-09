@@ -10,7 +10,7 @@ export async function GET(request: Request) {
         // --- SMART ROOTS LOGIC ---
         const isWin = os.platform() === 'win32';
         const defaultRoot = isWin
-            ? "C:\\Users\\paulo\\.gemini\antigravity\\playground\\core-omega"
+            ? "C:\\Users\\paulo\\.gemini\\antigravity\\playground\\core-omega"
             : "/home/root/staging_projects";
 
         let requestedPath = searchParams.get("path") || defaultRoot;
